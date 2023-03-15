@@ -1,62 +1,110 @@
 import random
+from model.Rect import Rect
+from model.Triangle import Triangle
+from model.Circle import Circle
+from shapely.geometry import Polygon, Point
+from shapely.ops import unary_union
 
 class FileIO:
 
-    def __init__(self):
-        pass
-
     def checkedTriangle(self, a, b, c):
-        if (a + b > c and b + c > a and a + c > b ):
+        if (a + b > c and a + c > b and b + c > a):
             return True
         else:
             return False
 
-    def readFile(self, qty):
+    def readFile(self, filePath, qty):
         shapes = ["Rect", "Circle", "Triangle"]
-        with open("D:\input.txt", "w") as file:
+        with open(filePath, "w") as f:
             for i in range(qty):
                 shape = random.choice(shapes)
                 if shape == "Rect":
-                    width = random.randint(1, 100)
-                    height = random.randint(1, 100)
+                    cRong = random.randint(1, 100)
+                    cDai = random.randint(1, 100)
                     x = random.randint(0, 1000)
                     y = random.randint(0, 1000)
-                    file.write("#Rect\n")
-                    file.write(f"{width} {height}\n")
-                    file.write(f"{x} {y}\n")
+                    f.write("#Rect\n")
+                    f.write(f"{cRong} {cDai}\n")
+                    f.write(f"{x} {y}\n")
                 elif shape == "Circle":
-                    radius = random.randint(1, 100)
+                    bKinh = random.randint(1, 100)
                     x = random.randint(0, 1000)
                     y = random.randint(0, 1000)
-                    file.write("#Circle\n")
-                    file.write(f"{radius}\n")
-                    file.write(f"{x} {y}\n")
+                    f.write("#Circle\n")
+                    f.write(f"{bKinh}\n")
+                    f.write(f"{x} {y}\n")
                 else:
                     a = random.randint(1, 100)
                     b = random.randint(1, 100)
                     c = random.randint(1, 100)
                     x = random.randint(0, 1000)
                     y = random.randint(0, 1000)
-                    check = self.checkedTriangle(a, b, c)
-                    if check == True:
-                        file.write("#Triangle\n")
-                        file.write(f"{a} {b} {c}\n")
-                        file.write(f"{x} {y}\n")
+                    checked = self.checkedTriangle(a, b, c)
+                    if checked == True:
+                        f.write("#Triangle\n")
+                        f.write(f"{a} {b} {c}\n")
+                        f.write(f"{x} {y}\n")
                     else:
-                        print("triangle - error!!!")
-                        
-    def writeFile(self, text):
+                        print("Error!!!")
+        
+             
+    def writeFile(self, filePath):
         shapes = []
-        lines = text.split('\n')
-        for line in lines:
-            if line.startswith('#Rect'):
-                width, height = map(int, line[6:].split())
-                shapes.append(('rect', width, height))
-            elif line.startswith('#Circle'):
-                radius = int(line[7:])
-                shapes.append(('circle', radius))
-            elif line.startswith('#Triangle'):
-                sides = list(map(int, line[9:].split()))
-                x, y = map(int, lines[lines.index(line) + 1].split())
-                shapes.append(('triangle', sides, x, y))
+        with open(filePath, 'r') as f:
+            while True:
+                line = f.readline().strip()
+                if not line:
+                    break
+                if line == '#Circle':
+                    bKinh = float(f.readline().strip())
+                    x, y = map(int, f.readline().strip().split())
+                    circle = Circle(x, y, bKinh)
+                    shapes.append(circle)
+                elif line == '#Rect':
+                    cRong, cDai = map(float, f.readline().strip().split())
+                    x, y = map(int, f.readline().strip().split())
+                    rect = Rect(x, y, cRong, cDai)
+                    shapes.append(rect)
+                elif line == '#Triangle':
+                    a, b, c = map(float, f.readline().strip().split())
+                    x, y = map(int, f.readline().strip().split())
+                    triangle = Triangle(x, y, a, b, c)
+                    shapes.append(triangle)
         return shapes
+        
+    def findLargestShapes(self, shapes):
+        maxPerimeterShape = None
+        maxAreaShape = None
+        for shape in shapes:
+            if maxPerimeterShape is None or shape.chuVi() > maxPerimeterShape.chuVi():
+                maxPerimeterShape = shape
+            if maxAreaShape is None or shape.dienTich() > maxAreaShape.dienTich():
+                maxAreaShape = shape
+        newShapes = [maxPerimeterShape, maxAreaShape]
+        return newShapes;
+      
+    def unaryUnion(self, filePath): 
+        shapes = []
+        with open(filePath, 'r') as f:
+            while True:
+                line = f.readline().strip()
+                if not line:
+                    break
+                if line == '#Circle':
+                    bKinh = float(f.readline().strip())
+                    x, y = map(int, f.readline().strip().split())
+                    circle = Point(x, y).buffer(bKinh)
+                    shapes.append(circle)
+                elif line == '#Rect':
+                    cRong, cDai = map(float, f.readline().strip().split())
+                    x, y = map(int, f.readline().strip().split())
+                    rect = Polygon([(x, y), (x + cRong, y), (x + cRong, y + cDai), (x, y + cDai)])
+                    shapes.append(rect)
+                elif line == '#Triangle':
+                    a, b, c = map(float, f.readline().strip().split())
+                    x, y = map(int, f.readline().strip().split())
+                    triangle = Polygon([(x, y), (x + b, y), (x + c, y + a), (x, y)])
+                    shapes.append(triangle)
+        newShapes = unary_union(shapes)
+        return ', '.join([f'{shape:.3f}' for shape in newShapes.bounds])
+        

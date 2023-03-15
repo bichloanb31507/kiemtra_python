@@ -1,15 +1,15 @@
-from kiemtra_Loan.model.Shape import Shape
+from model.Shape import Shape
 
 class Rect(Shape):
     
-    def __init__(self, x, y, rong, dai):
-        super.__init__(x, y)
-        self.rong = rong
-        self.dai = dai
+    def __init__(self, x, y, cRong, cDai):
+        Shape.__init__(x, y)
+        self.cRong = cRong
+        self.cDai = cDai
         
     def chuVi(self):
-        return 2 * (self.rong + self.dai)
+        return 2 * (self.cRong + self.cDai)
         
     def dienTich(self):
-        return self.rong * self.dai
+        return self.cRong * self.cDai
         

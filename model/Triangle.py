@@ -1,10 +1,10 @@
-
-from kiemtra_Loan.model.Shape import Shape
+import math
+from model.Shape import Shape
 
 class Triangle(Shape):
     
     def __init__(self, x, y, a, b, c):
-        super.__init__(x, y)
+        Shape.__init__(x, y)
         self.a = a
         self.b = b
         self.c = c
@@ -13,4 +13,5 @@ class Triangle(Shape):
         return self.a + self.b + self.c
     
     def dienTich(self):
-        c = self.chu
+        x = self.chuVi() / 2
+        return math.sqrt(x * (x - self.a) * (x - self.b) * (x - self.c))

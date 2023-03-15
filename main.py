@@ -2,6 +2,6 @@ from util.FileIO import FileIO
 
 fileIO = FileIO()
 
-# fileIO.inputFile(10)
+print(fileIO.unaryUnion("D:\input.txt"))
 
 
